@@ -31,15 +31,15 @@ struct ContentView: View {
             Text("\(channelURL)")
             
             #warning("This is new in iOS 15 to load an image asynchronously from a URL")
-//            AsyncImage(url: URL(string: imageURL))
-//                .frame(height: 40)
+//             AsyncImage(url: URL(string: imageURL))
+//                 .frame(height: 40)
             
             //List of News Items
             List(newsItems){ item in
                 VStack(alignment: .leading){
                     Text("\(item.title)")
                         .bold()
-                    Text("\(item.pubDate)")
+                    Text(displayDate(date: item.pubDate))
                         .italic()
                         .font(.system(size: 14))
                 }
@@ -73,18 +73,28 @@ struct ContentView: View {
                     item.url = elem["link"].element!.text
                     item.pubDate = cleanDate(date: elem["pubDate"].element!.text)
                     newsItems.append(item)
+                    
+                    //Sort the news items by publication date
+                    newsItems = newsItems.sorted{$0.pubDate.compare($1.pubDate) == .orderedDescending}
                 }
             }
         }
+        
         task.resume()
     }
-
+    
     func cleanDate(date: String) -> Date
     {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "E, d MMM yyyy HH:mm:ss Z"
-        let pubDate = dateFormatter.date(from:date)!
-        return pubDate
+        return dateFormatter.date(from:date)!
+    }
+    
+    func displayDate(date: Date) -> String
+    {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EEEE, MMM d, yyyy HH:mm"
+        return dateFormatter.string(from:date)
     }
 }
 
